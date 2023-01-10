@@ -1,4 +1,6 @@
-# .
+# Editor Project
+
+Building a web editor with vanilla JavaScript
 
 This template should help get you started developing with Vue 3 in Vite.
 
