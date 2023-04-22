@@ -1,24 +1,25 @@
 <template>
   <div class="editor">
     <h2>Text Editor</h2>
-    <div class="editor--header">
+    <!-- <div class="editor--header">
       <button class="editor--button" type="button"><b><strong>B</strong></b></button>
       <button class="editor--button" type="button"><b><i>I</i></b></button>
       <button class="editor--button" type="button"><b><u>U</u></b></button>
       <button class="editor--button" type="button"><b>X<sup>1</sup></b></button>
       <button class="editor--button" type="button"><b>X<sub>1</sub></b></button>
       <button class="editor--button" type="button">T</button>
-    </div>
+    </div> -->
     <hr>
     <div class="body">
       <div class="form--item">
         <div class="editor--header">
           <!-- <button class="editor--button" @click.prevent="handleSelect($event)" :class="button.type" type="button" :id="button.id" :ref="el => { buttonRef[index] = el }" v-for="(button, index) in buttons" v-html="button.text"></button> -->
-          <button class="editor--button format" id="bold" ref="boldButtonRef" type="button" @click.prevent="handleSelect(boldButtonRef)"><b><strong>B</strong></b></button>
-          <button class="editor--button format" id="italic" ref="italicsButtonRef" type="button" @click.prevent="handleSelect(italicsButtonRef)"><b><i>I</i></b></button>
-          <button class="editor--button format" id="underline" ref="underlineButtonRef" type="button" @click.prevent="handleSelect(underlineButtonRef)"><b><u>U</u></b></button>
-          <button class="editor--button script" id="superscript" ref="superscriptButtonRef" type="button" @click.prevent="handleSelect(superscriptButtonRef)"><b>X<sup>1</sup></b></button>
-          <button class="editor--button script" id="subscript" ref="subscriptButtonRef" type="button" @click.prevent="handleSelect(subscriptButtonRef)"><b>X<sub>1</sub></b></button>
+          <button class="editor--button format" id="bold" title="bold" ref="boldButtonRef" type="button" @click.prevent="handleSelect(boldButtonRef)"><b><strong>B</strong></b></button>
+          <button class="editor--button format" id="italic" title="italic" ref="italicsButtonRef" type="button" @click.prevent="handleSelect(italicsButtonRef)"><b><i>I</i></b></button>
+          <button class="editor--button format" id="underline" title="underline" ref="underlineButtonRef" type="button" @click.prevent="handleSelect(underlineButtonRef)"><b><u>U</u></b></button>
+          <button class="editor--button script" id="superscript" title="superscript" ref="superscriptButtonRef" type="button" @click.prevent="handleSelect(superscriptButtonRef)"><b>X<sup>1</sup></b></button>
+          <button class="editor--button script" id="subscript" title="subscript" ref="subscriptButtonRef" type="button" @click.prevent="handleSelect(subscriptButtonRef)"><b>X<sub>1</sub></b></button>
+          <button class="editor--button script" id="squareroot" title="squareroot" ref="squreRootButtonRef" type="button" @click.prevent="handleSelect(squreRootButtonRef)"><b>√<i>1</i></b></button>
           <!-- <button class="editor--button" type="button">T</button> -->
         </div>
         <div id="text-input" ref="contentRef" contenteditable="true">This is an equation of type \sqrt(x^2+y^2\ )=z^2</div>
@@ -61,6 +62,7 @@ var italicsButtonRef = ref([]);
 var underlineButtonRef = ref([]);
 var superscriptButtonRef = ref([]);
 var subscriptButtonRef = ref([]);
+var squreRootButtonRef = ref([]);
 var contentRef = ref([]);
 
 onMounted(async () => {
