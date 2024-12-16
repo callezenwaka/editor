@@ -2,11 +2,16 @@
 class TextEditor {
     constructor(containerId) {
         // Initialize properties
-        this.container = document.getElementById(containerId) || document.createElement('div');
+        // this.container = document.getElementById(containerId) || document.createElement('div');
+
+        // Initialize properties
+        this.container = document.getElementById(containerId);
+        if (!this.container) {
+            throw new Error(`Container element with id '${containerId}' not found`);
+        }
         this.textarea = null;
         this.toolbar = null;
         this.sendButton = null;
-        
         this.uploadedImages = new Map(); // Store uploaded image references
         this.isUploading = false;
 
@@ -24,7 +29,11 @@ class TextEditor {
         ];
         this.fontStyles = ['Normal', 'Bold', 'Italic', 'Bold Italic'];
 
+        // Initialize the editor
         this.initializeEditor();
+
+        // Add paste event listener after textarea is created
+        this.textarea.addEventListener('paste', (e) => this.handleImagePaste(e));
     }
 
     createSelect(options, defaultValue, onChange) {
@@ -116,16 +125,16 @@ class TextEditor {
         // Add formatting buttons
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = 'display: flex; align-items: center; gap: 4px;';
-        
+
         const buttons = [
             { text: 'B', command: 'bold', style: 'font-weight: bold;' },
             { text: 'I', command: 'italic', style: 'font-style: italic;' },
             { text: 'U', command: 'underline', style: 'text-decoration: underline;' },
             { text: '•', command: 'bullet', style: '' },
             { text: '1.', command: 'number', style: '' },
-            { text: '🖼', command: 'image', style: '' },
+            { text: '📷', command: 'image', style: '' }, // &#128247; | 🖼
             { text: '<>', command: 'code', style: 'font-family: monospace;' }
-        ];
+        ]; 
 
         buttons.forEach(btn => {
             const button = document.createElement('button');
@@ -158,19 +167,33 @@ class TextEditor {
             box-sizing: border-box;
         `;
 
+        // Add input event listener to textarea
+        this.textarea.addEventListener('input', () => this.updateSendButtonState());
+
         // Create send button
         this.sendButton = document.createElement('button');
         this.sendButton.textContent = 'Send';
+        // this.sendButton.style.cssText = `
+        //     margin-top: 12px;
+        //     padding: 8px 24px;
+        //     background-color: #a1a1a1;
+        //     color: white;
+        //     border: none;
+        //     border-radius: 4px;
+        //     cursor: pointer;
+        //     font-size: 14px;
+        //     font-weight: bold;
+        // `;
         this.sendButton.style.cssText = `
             margin-top: 12px;
             padding: 8px 24px;
-            background-color: #a1a1a1;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
             font-weight: bold;
+            transition: background-color 0.2s ease;
         `;
         this.sendButton.addEventListener('click', () => this.handleSend());
 
@@ -180,13 +203,21 @@ class TextEditor {
         this.container.appendChild(this.sendButton);
     }
 
+    // Add new method to update send button state
+    updateSendButtonState() {
+        const hasContent = this.textarea.value.trim().length > 0;
+        this.sendButton.style.backgroundColor = hasContent ? '#000000' : '#a1a1a1';
+        this.sendButton.style.cursor = hasContent ? 'pointer' : 'default';
+        this.sendButton.disabled = !hasContent;
+    }
+
     handleFormatting(command) {
         const textarea = this.textarea;
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selectedText = textarea.value.substring(start, end);
         const lines = selectedText.split('\n');
-        
+
         let formattedText = '';
         switch (command) {
             case 'bold':
@@ -212,11 +243,11 @@ class TextEditor {
                 break;
         }
 
-        textarea.value = 
+        textarea.value =
             textarea.value.substring(0, start) +
             formattedText +
             textarea.value.substring(end);
-        
+
         const newPosition = start + formattedText.length;
         textarea.setSelectionRange(newPosition, newPosition);
         textarea.focus();
@@ -224,6 +255,11 @@ class TextEditor {
 
     async handleSend() {
         try {
+
+            const content = this.textarea.value.trim();
+            if (!content) {
+                return;
+            }
             if (this.isUploading) {
                 console.warn('Please wait for image upload to complete');
                 return;
@@ -280,7 +316,7 @@ class TextEditor {
                 // Clear the textarea and uploaded images
                 this.textarea.value = '';
                 this.uploadedImages.clear();
-                
+
                 // Show success feedback
                 this.showFeedback('Message sent successfully', 'success');
             } else {
@@ -325,7 +361,7 @@ class TextEditor {
 
             const { imageUrl: uploadedUrl } = await response.json();
             this.uploadedImages.set(imageUrl, uploadedUrl);
-            
+
             return uploadedUrl;
 
         } catch (error) {
@@ -397,22 +433,22 @@ class TextEditor {
         for (const item of items) {
             if (item.type.indexOf('image') === 0) {
                 event.preventDefault();
-                
+
                 const blob = item.getAsFile();
                 const reader = new FileReader();
-                
+
                 reader.onload = (e) => {
                     const imageUrl = e.target.result;
                     const imageMarkdown = `![Image](${imageUrl})`;
-                    
+
                     // Insert image markdown at cursor position
                     const cursorPos = this.textarea.selectionStart;
-                    this.textarea.value = 
+                    this.textarea.value =
                         this.textarea.value.substring(0, cursorPos) +
                         imageMarkdown +
                         this.textarea.value.substring(this.textarea.selectionEnd);
                 };
-                
+
                 reader.readAsDataURL(blob);
                 break;
             }
@@ -425,8 +461,15 @@ class TextEditor {
     // }
 }
 
-// Add event listener for image paste in the constructor
-this.textarea.addEventListener('paste', (e) => this.handleImagePaste(e));
-
 // Usage
-const editor = new TextEditor('editor-container');
+// const editor = new TextEditor('editor-container');
+// Add event listener for image paste in the constructor
+// this.textarea.addEventListener('paste', (e) => this.handleImagePaste(e));
+// Initialization code
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const editor = new TextEditor('editor-container');
+    } catch (error) {
+        console.error('Failed to initialize text editor:', error);
+    }
+});
